@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 import firestore_repo
@@ -30,6 +31,17 @@ MAX_REFRESH_DATES = max(1, int(os.getenv("MAX_REFRESH_DATES", "20")))
 # subsequent calls cheap when the requested dates already exist.
 
 app = FastAPI(title="SCCE Latest Attendance API", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5500",
+        "https://scceclub-5681e.web.app",
+        "https://scceclub-5681e.firebaseapp.com",
+    ],
+    allow_credentials=False,
+    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 _student_locks: dict[str, threading.Lock] = {}
 _student_locks_guard = threading.Lock()
 _last_refresh_attempt: dict[str, float] = {}
